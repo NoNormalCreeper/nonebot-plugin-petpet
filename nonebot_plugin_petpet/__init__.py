@@ -22,10 +22,11 @@ from .models import UserInfo, Command
 
 __help__plugin_name__ = "petpet"
 __des__ = "摸头等头像相关表情制作"
-__cmd__ = f"""
+__cmd__ = """
 触发方式：指令 + @user/qq/自己/图片
 发送“头像表情包”查看支持的指令
 """.strip()
+
 __example__ = """
 摸 @小Q
 摸 114514
@@ -58,11 +59,11 @@ async def get_user_info(bot: Bot, user: UserInfo):
             group_id=int(user.group), user_id=int(user.qq)
         )
         user.name = info.get("card", "") or info.get("nickname", "")
-        user.gender = info.get("sex", "")
     else:
         info = await bot.get_stranger_info(user_id=int(user.qq))
         user.name = info.get("nickname", "")
-        user.gender = info.get("sex", "")
+
+    user.gender = info.get("sex", "")
 
 
 def check_args_rule(command: Command) -> T_RuleChecker:

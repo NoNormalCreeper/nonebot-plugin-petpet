@@ -39,7 +39,7 @@ async def operations(users: List[UserInfo], args: List[str] = [], **kwargs) -> B
             frame = img.convert("L")
         elif op == "旋转":
             angle = int(args[1]) if args[1:] and args[1].isdigit() else 90
-            frame = rotate(img, int(angle))
+            frame = rotate(img, angle)
         elif op == "反相":
             img = img.convert("RGB")
             frame = ImageOps.invert(img)
@@ -203,9 +203,9 @@ async def play(users: List[UserInfo], **kwargs) -> BytesIO:
         frame.paste(raw_frame, mask=raw_frame)
         img_frames.append(frame)
     frames = []
-    for i in range(2):
-        frames.extend(img_frames[0:12])
-    frames.extend(img_frames[0:8])
+    for _ in range(2):
+        frames.extend(img_frames[:12])
+    frames.extend(img_frames[:8])
     frames.extend(img_frames[12:18])
     frames.extend(raw_frames[18:23])
     return save_gif(frames, 0.06)
@@ -812,15 +812,15 @@ async def paint(users: List[UserInfo], **kwargs) -> BytesIO:
 async def shock(users: List[UserInfo], **kwargs) -> BytesIO:
     img = users[0].img
     img = fit_size(img, (300, 300))
-    frames = []
-    for i in range(30):
-        frames.append(
-            rotate(
-                motion_blur(img, random.randint(-90, 90), random.randint(0, 90)),
-                random.randint(-20, 20),
-                expand=False,
-            )
+    frames = [
+        rotate(
+            motion_blur(img, random.randint(-90, 90), random.randint(0, 90)),
+            random.randint(-20, 20),
+            expand=False,
         )
+        for _ in range(30)
+    ]
+
     return save_gif(frames, 0.01)
 
 
@@ -832,7 +832,7 @@ async def coupon(users: List[UserInfo], args: List[str] = [], **kwargs) -> Bytes
 
     font = await load_font(DEFAULT_FONT, 30)
     text_img = Image.new("RGBA", (250, 100))
-    text = f"{users[0].name}陪睡券" if not args else args[0]
+    text = args[0] if args else f"{users[0].name}陪睡券"
     text += "\n（永久有效）" if len(args) <= 1 else f"\n{args[1]}"
     text_w = font.getsize_multiline(text)[0]
     if text_w > text_img.width:
@@ -1005,7 +1005,7 @@ async def symmetric(users: List[UserInfo], args: List[str] = [], **kwargs) -> By
 async def safe_sense(users: List[UserInfo], args: List[str] = [], **kwargs) -> BytesIO:
     img = users[0].img
     img = fit_size(img, (215, 343))
-    frame = await load_image(f"safe_sense/0.png")
+    frame = await load_image("safe_sense/0.png")
     frame.paste(img, (215, 135))
 
     ta = "她" if users[0].gender == "female" else "他"
@@ -1034,7 +1034,7 @@ async def always_like(users: List[UserInfo], args: List[str] = [], **kwargs) -> 
     name = (args[0] if args else "") or users[0].name
     if not name:
         raise ValueError(REQUIRE_NAME)
-    text = "我永远喜欢" + name
+    text = f"我永远喜欢{name}"
     fontname = BOLD_FONT
     fontsize = await fit_font_size(text, 800, 100, fontname, 70, 30)
     if not fontsize:
@@ -1045,7 +1045,7 @@ async def always_like(users: List[UserInfo], args: List[str] = [], **kwargs) -> 
             ["red", "darkorange", "gold", "darkgreen", "blue", "cyan", "purple"]
         )
 
-    frame = await load_image(f"always_like/0.png")
+    frame = await load_image("always_like/0.png")
     frame.paste(fit_size(img, (350, 400), FitSizeMode.INSIDE), (25, 35))
     font = await load_font(fontname, fontsize)
     text_w, text_h = font.getsize(text)

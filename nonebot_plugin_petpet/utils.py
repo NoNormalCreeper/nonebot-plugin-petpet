@@ -59,7 +59,7 @@ async def draw_text(
         return
 
     draw = ImageDraw.Draw(img)
-    if all([char not in UNICODE_EMOJI["en"] for char in text]):
+    if all(char not in UNICODE_EMOJI["en"] for char in text):
         draw.multiline_text(
             pos,
             text,
@@ -298,12 +298,11 @@ def save_gif(frames: List[IMG], duration: float) -> BytesIO:
 
 
 def to_jpg(frame: IMG, bg_color=(255, 255, 255)) -> IMG:
-    if frame.mode == "RGBA":
-        bg = Image.new("RGB", frame.size, bg_color)
-        bg.paste(frame, mask=frame.split()[3])
-        return bg
-    else:
+    if frame.mode != "RGBA":
         return frame.convert("RGB")
+    bg = Image.new("RGB", frame.size, bg_color)
+    bg.paste(frame, mask=frame.split()[3])
+    return bg
 
 
 def save_jpg(frame: IMG) -> BytesIO:
@@ -410,7 +409,7 @@ async def fit_font_size(
 
 
 async def translate(text: str) -> str:
-    url = f"http://fanyi.youdao.com/translate"
+    url = "http://fanyi.youdao.com/translate"
     params = {"type": "ZH_CN2JA", "i": text, "doctype": "json"}
     try:
         async with httpx.AsyncClient() as client:
